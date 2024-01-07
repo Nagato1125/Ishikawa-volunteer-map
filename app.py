@@ -5,6 +5,8 @@ import pandas as pd
 import geopandas as gpd
 import gspread
 from google.oauth2 import service_account
+import pytz
+from datetime import datetime
 
 acceptable_color = "#059669"
 limit_acceptable_color = "#D97706"
@@ -33,13 +35,17 @@ def load_geo_json():
 def load_accept_vo_data():
     return pd.read_excel("Ishikawa_town_accept_volunteer.xlsx")
 
-def load_accept_vo_data_from_gspread():
+def load_gspread():
     scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
     credentials = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
 
     gc = gspread.authorize(credentials)
     sheet_url = st.secrets["SP_SHEET_URL"]["url"]
     sp = gc.open_by_url(sheet_url)
+
+    return sp
+
+def conv_sp_to_df(sp):
     sheet = sp.worksheet("シート1").get_all_values()
     return pd.DataFrame(sheet[1:], columns=sheet[0])
     
@@ -64,6 +70,18 @@ def create_map(geojson_data):
     ).add_to(m)
 
     return m
+
+def get_last_update_time_in_jst(sp):
+    dt = datetime.strptime(sp.lastUpdateTime, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+    # UTCを表すタイムゾーンを設定
+    dt_utc = dt.replace(tzinfo=pytz.UTC)
+
+    # 日本時間（JST）に変換
+    dt_jst = dt_utc.astimezone(pytz.timezone('Asia/Tokyo'))
+
+    return dt_jst.strftime('%m月%d日 %H時%M分')
+    
 
 def main():
     st.set_page_config(
@@ -91,7 +109,8 @@ def main():
 
     # Load GeoJSON data
     gpd_df = load_geo_json()
-    df_acceptable_vo = load_accept_vo_data_from_gspread()
+    sp = load_gspread()
+    df_acceptable_vo = conv_sp_to_df(sp)
     df_concat = pd.merge(left=gpd_df, right=df_acceptable_vo, left_on="N03_004", right_on="市区町村名")
 
     # Create the map
