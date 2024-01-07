@@ -80,7 +80,7 @@ def get_last_update_time_in_jst(sp):
     # 日本時間（JST）に変換
     dt_jst = dt_utc.astimezone(pytz.timezone('Asia/Tokyo'))
 
-    return dt_jst.strftime('%m月%d日 %H時%M分')
+    return dt_jst.strftime('%Y年%m月%d日 %H時%M分 JST')
     
 
 def main():
