@@ -1,0 +1,7 @@
+folium==0.15.1
+geopandas==0.14.2
+gspread==5.12.4
+pandas==2.1.4
+protobuf==4.25.1
+streamlit==1.29.0
+streamlit_folium==0.18.0
