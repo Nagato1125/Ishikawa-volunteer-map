@@ -84,6 +84,13 @@ def get_last_update_time_in_jst(sp):
     
 
 def main():
+    # Load GeoJSON data
+    gpd_df = load_geo_json()
+    sp = load_gspread()
+    last_update_time = get_last_update_time_in_jst(sp)
+    df_acceptable_vo = conv_sp_to_df(sp)
+    df_concat = pd.merge(left=gpd_df, right=df_acceptable_vo, left_on="N03_004", right_on="市区町村名")
+
     st.set_page_config(
         page_title="石川県ボランティア受け入れ情報マップ",
         page_icon=":world_map:",
@@ -91,7 +98,7 @@ def main():
     )
 
     st.header(":world_map:石川県ボランティア受け入れ情報マップ")
-    st.write("XX月XX日　XX時時点")
+    st.write(f"{last_update_time}時点")
 
     st.subheader("地図の見方")
     st.markdown("""
@@ -105,14 +112,6 @@ def main():
                手動更新のため、情報に抜け、漏れがある可能性があります。
                必ず自治体からの最新の情報を確認してください。
                ボランティアを募集していないと表記している自治体には募集状況が不明な自治体も含まれます。""")
-
-
-    # Load GeoJSON data
-    gpd_df = load_geo_json()
-    sp = load_gspread()
-    df_acceptable_vo = conv_sp_to_df(sp)
-    df_concat = pd.merge(left=gpd_df, right=df_acceptable_vo, left_on="N03_004", right_on="市区町村名")
-
     # Create the map
     folium_map = create_map(df_concat)
 
