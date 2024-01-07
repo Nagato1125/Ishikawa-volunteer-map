@@ -118,6 +118,13 @@ def main():
     # Display the map in the Streamlit app
     st_folium(folium_map, width=700)
 
+    st.caption("""
+               このサイトに関するお問い合わせ先  
+               X (旧Twitter): @  
+               Mail: volunteer.information.2024@gmail.com  
+               ※このサイトは地方自治体とは一切関係はありません。このサイトの情報について自治体に問い合わせることは絶対にしないでください。
+               """)
+
 
 if __name__ == "__main__":
     main()
